@@ -20,7 +20,6 @@ if __name__ == '__main__':
     grid = gr.Grid(window, grid_x, grid_y, start_pos, end_pos)
 
 
-
     while True:
         # new grid that contains distances instead of tiles
         d_grid = copy.deepcopy(grid)
@@ -36,8 +35,5 @@ if __name__ == '__main__':
             correct_path = gf.generate_path(start_pos, end_pos, d_grid)
             # create a map with solution
             gf.complete_map(c_grid, correct_path, SP, EP, P)
-        gg.cls(window, c_grid, WALL, SP, EP, P)
         gg.draw_solution(window, c_grid, WALL, SP, EP, P)
         gg.update_grid(window, grid, window.getMouse(), WALL, N, start_pos, end_pos)
-        del c_grid
-        del d_grid
