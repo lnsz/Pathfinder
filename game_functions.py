@@ -1,162 +1,121 @@
-import copy
-
-
-def generate_map(map_file):
+def find_paths(grid, start, end, wall):
     """
-    text file open for reading -> list of list of char
-    """
+    (grid object, tuple, tuple, str) -> list of tuple
 
-    mp = map_file.read().split("\n")
-    for i in range(len(mp)):
-        mp[i] = list(mp[i])
-    return mp
+    Going from the end until start, find all possible paths through the grid
+    avoiding wall, and add them to queue
 
-
-def starting_point(mp, sp):
-    """
-    list of list of char -> dict of {str:int}
     """
 
-    for y in range(len(mp)):
-        for x in range(len(mp[y])):
-            if mp[y][x] == sp:
-                return {"y": y, "x": x}
-
-    #return {"y": len(mp)-1, "x": len(mp[0])//2}
-
-
-def ending_point(mp, ep):
-    """
-    list of list of char -> dict of {str:int}
-    """
-
-    for y in range(len(mp)):
-        for x in range(len(mp[y])):
-            if mp[y][x] == ep:
-                return {"y": y, "x": x}
-
-
-def find_paths(mp, origin, endpoint, wall):
-    """
-    list of list of char, dict of {str:int}, dict of {str:int} ->
-    list of dict of {str:int}
-    """
-
-    queue = [{"x": endpoint["x"], "y": endpoint["y"], "counter": 0}]
+    # create queue with only endpoint
+    # queue is a list of tuples with 3 elements
+    # each element is in form(position x, position y, counter)
+    # counter tracks how many steps it takes to reach from end
+    queue = [(end[0], end[1], 0)]
     for item in queue:
-        if item["x"] != origin["x"] or item["y"] != origin["y"]:
-            queue.extend(process_adjacent(mp, item, queue, wall))
+        if item[0] != start[0] or item[1] != start[1]:
+            queue.extend(process_adjacent(grid, item, queue, wall))
         else:
             return queue
 
 
-def distance_map(mp, queue):
+def process_adjacent(grid, point, queue, wall):
     """
-    list of list of char, list of dict of {str:int} -> list of list of char
-    """
-
-    temp_map = copy.deepcopy(mp)
-    for item in queue:
-        temp_map[item["y"]][item["x"]] = item["counter"]
-    return temp_map
-
-
-def completed_map(mp, solution, sp, ep):
-    """
-    list of list of char, list of dict of {str:int} -> list of list of char
-    """
-
-    temp_map = copy.deepcopy(mp)
-    for point in solution:
-        if temp_map[point["y"]][point["x"]] != sp and temp_map[point["y"]][point["x"]] != ep:
-         temp_map[point["y"]][point["x"]] = "*"
-    return temp_map
-
-
-def generate_path(origin, endpoint, d_map):
-    """
-    dict of {str:int}, list of list of char -> dict of {str:int}
-    """
-
-    path = [origin]
-    point = origin
-    while point != endpoint:
-        point = next_point(point, d_map)
-        path.append(point)
-    return path
-
-
-def next_point(point, d_map):
-    """
-    dict of {str:int}, list of list of char -> dict of {str:int}
-    """
-
-    # if point is not outside map and the adjacent point's counter is 1 less
-    # than it's counter
-    y = point["y"]
-    x = point["x"]
-    if y-1 >= 0 and d_map[y-1][x] == d_map[y][x]-1:
-        return {"x": x, "y": y-1}
-
-    elif x+1 < len(d_map[y]) and d_map[y][x+1] == d_map[y][x]-1:
-        return {"x": x+1, "y": y}
-
-    elif x-1 >= 0 and d_map[y][x-1] == d_map[y][x]-1:
-        return {"x": x-1, "y": y}
-
-    elif y + 1 < len(d_map) and d_map[y+1][x] == d_map[y][x]-1:
-        return {"x": x, "y": y+1}
-
-def process_adjacent(map, point, queue, wall):
-    """
-    list of list of char, dict of {str:int}, list of dict of {str:int} ->
-    list of dict of {str:int}
+    (grid object, tuple, list of tuple, str) -> list of tuple
     """
 
     adjacent_points = []
-    y = point["y"]
-    x = point["x"]
-    c = point["counter"]
-    # if point is not outside map and is not a wall and does not exist in queue
-    if x+1 < len(map[y]) and map[y][x+1] != wall and duplicate_check(x+1, y, c+1, queue):
-        adjacent_points.append({"x": x+1, "y": y, "counter": c+1})
+    x = point[0]
+    y = point[1]
+    c = point[2]
+    # if point is not outside grid and is not a wall and does not exist in queue
+    if x + 1 < grid.get_length() and grid.tile_at(x + 1, y) != wall and \
+            duplicate_check(x + 1, y, c + 1, queue):
+        adjacent_points.append((x + 1, y, c + 1))
 
-    if x-1 >= 0 and map[y][x-1] != wall and duplicate_check(x-1, y, c+1, queue):
-        adjacent_points.append({"x": x-1, "y": y, "counter": c+1})
+    if x - 1 >= 0 and grid.tile_at(x - 1, y) != wall and \
+            duplicate_check(x - 1, y, c + 1, queue):
+        adjacent_points.append((x - 1, y, c + 1))
 
-    if y+1 < len(map) and map[y+1][x] != wall and duplicate_check(x, y+1, c+1, queue):
-        adjacent_points.append({"x": x, "y": y+1, "counter": c+1})
+    if y + 1 < grid.get_height() and grid.tile_at(x, y + 1) != wall and \
+            duplicate_check(x, y + 1, c + 1, queue):
+        adjacent_points.append((x, y + 1, c + 1))
 
-    if y-1 >= 0 and map[y-1][x] != wall and duplicate_check(x, y-1, c+1, queue):
-        adjacent_points.append({"x": x, "y": y-1, "counter": c+1})
+    if y - 1 >= 0 and grid.tile_at(x, y - 1) != wall and \
+            duplicate_check(x, y - 1, c + 1, queue):
+        adjacent_points.append((x, y - 1, c + 1))
     return adjacent_points
 
 
 def duplicate_check(x, y, counter, queue):
     """
-    dict of {str:int}, list of dict of {str:int} -> bool
+    (int, int, int, list of tuple) -> bool
     """
     for item in queue:
-        if item["x"] == x and item["y"] == y and item["counter"] <= counter:
+        if item[0] == x and item[1] == y and item[2] <= counter:
             return False
     return True
 
 
 def is_solvable(queue):
     """
-    list of dict of {str:int} -> bool
+    (list of tuple) -> bool
     """
 
     return queue is not None
 
 
-def print_map(mp):
+def distance_map(d_grid, paths):
     """
-    list of list of char -> NoneType
+    (grid object, list of tuple) -> NoneType
     """
 
-    for i in mp:
-        for l in i:
-            print(str(l), end="\t")
-        print("")
-        print("")
+    for point in paths:
+        d_grid.modify_tile(point[0], point[1], point[2])
+
+
+def generate_path(start, end, d_map):
+    """
+    (tuple, tuple, grid object) -> list of tuple
+    """
+
+    path = [start]
+    point = start
+    while point != end:
+        point = next_point(point, d_map)
+        path.append(point)
+    return path
+
+
+def next_point(point, d_grid):
+    """
+    (tuple, grid object) -> tuple
+    """
+
+    # if point is not outside map and the adjacent point's counter is 1 less
+    # than it's counter
+    x = point[0]
+    y = point[1]
+    if y - 1 >= 0 and d_grid.tile_at(x, y - 1) == d_grid.tile_at(x, y) - 1:
+        return (x, y - 1)
+
+    elif x + 1 < d_grid.get_length() and d_grid.tile_at(x + 1, y) == d_grid.tile_at(x, y) - 1:
+        return (x + 1, y)
+
+    elif x - 1 >= 0 and d_grid.tile_at(x - 1, y) == d_grid.tile_at(x, y) - 1:
+        return (x - 1, y)
+
+    elif y + 1 < d_grid.get_height() and d_grid.tile_at(x, y + 1) == d_grid.tile_at(x, y) - 1:
+        return (x, y + 1)
+
+
+def complete_map(c_grid, solution, sp, ep, p):
+    """
+    (grid object, list of tuple, str, str) -> NoneType
+    """
+
+    for point in solution:
+        # if tile is not a start or end tile
+        if c_grid.tile_at(point[0], point[1]) != sp and c_grid.tile_at(point[0], point[1]) != ep:
+            c_grid.modify_tile(point[0], point[1], p)
+
