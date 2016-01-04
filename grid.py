@@ -57,4 +57,4 @@ class Grid:
         return self.start
 
     def modify_tile(self, x, y, value):
-        self.tiles[y][x].set_state(value)
+        self.tiles[y][x].set_value(value)
