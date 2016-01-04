@@ -17,12 +17,6 @@ def draw_solution(window, c_grid, wall, sp, ep, path):
             tile.update_colour()
             tile.get_shape().draw(window)
 
-def cls(window, c_grid, wall, sp, ep, path):
-    for y in c_grid.get_tiles():
-        for tile in y:
-            tile.update_colour()
-            tile.get_shape().undraw()
-
 
 def update_grid(window, grid, mouse, wall, empty, start, end):
     x = mouse.x//(window.getWidth() // grid.get_height())
