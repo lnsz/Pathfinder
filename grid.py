@@ -36,8 +36,11 @@ class Grid:
     def get_end(self):
         return self.start
 
-    def tile_at(self, x, y):
+    def value_at(self, x, y):
         return self.tiles[y][x].get_value()
+
+    def tile_at(self, x, y):
+        return self.tiles[y][x]
 
     def modify_tile(self, x, y, value):
         self.tiles[y][x].set_value(value)
@@ -45,16 +48,8 @@ class Grid:
     def get_tiles(self):
         return self.tiles
 
-        return self.length
-
-    def get_height(self):
-        return self.height
-
-    def get_start(self):
-        return self.start
-
-    def get_end(self):
-        return self.start
-
-    def modify_tile(self, x, y, value):
-        self.tiles[y][x].set_value(value)
+    def clean_grid(self, empty, start, end):
+        for x in self.tiles:
+            for y in x:
+                if type(y.get_value()) == int:
+                    y.set_value(empty)
