@@ -44,5 +44,6 @@ class Tile:
             self.shape.setFill("white")
             self.shape.setOutline("black")
 
-    def get_shape(self):
-        return self.shape
+    def draw(self, window):
+        self.shape.undraw()
+        self.shape.draw(window)

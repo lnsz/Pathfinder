@@ -29,19 +29,19 @@ def process_adjacent(grid, point, queue, wall):
     y = point[1]
     c = point[2]
     # if point is not outside grid and is not a wall and does not exist in queue
-    if x + 1 < grid.get_length() and grid.tile_at(x + 1, y) != wall and \
+    if x + 1 < grid.get_length() and grid.value_at(x + 1, y) != wall and \
             duplicate_check(x + 1, y, c + 1, queue):
         adjacent_points.append((x + 1, y, c + 1))
 
-    if x - 1 >= 0 and grid.tile_at(x - 1, y) != wall and \
+    if x - 1 >= 0 and grid.value_at(x - 1, y) != wall and \
             duplicate_check(x - 1, y, c + 1, queue):
         adjacent_points.append((x - 1, y, c + 1))
 
-    if y + 1 < grid.get_height() and grid.tile_at(x, y + 1) != wall and \
+    if y + 1 < grid.get_height() and grid.value_at(x, y + 1) != wall and \
             duplicate_check(x, y + 1, c + 1, queue):
         adjacent_points.append((x, y + 1, c + 1))
 
-    if y - 1 >= 0 and grid.tile_at(x, y - 1) != wall and \
+    if y - 1 >= 0 and grid.value_at(x, y - 1) != wall and \
             duplicate_check(x, y - 1, c + 1, queue):
         adjacent_points.append((x, y - 1, c + 1))
     return adjacent_points
@@ -96,26 +96,24 @@ def next_point(point, d_grid):
     # than it's counter
     x = point[0]
     y = point[1]
-    if y - 1 >= 0 and d_grid.tile_at(x, y - 1) == d_grid.tile_at(x, y) - 1:
+    if y - 1 >= 0 and d_grid.value_at(x, y - 1) == d_grid.value_at(x, y) - 1:
         return (x, y - 1)
 
-    elif x + 1 < d_grid.get_length() and d_grid.tile_at(x + 1, y) == d_grid.tile_at(x, y) - 1:
+    elif x + 1 < d_grid.get_length() and d_grid.value_at(x + 1, y) == d_grid.value_at(x, y) - 1:
         return (x + 1, y)
 
-    elif x - 1 >= 0 and d_grid.tile_at(x - 1, y) == d_grid.tile_at(x, y) - 1:
+    elif x - 1 >= 0 and d_grid.value_at(x - 1, y) == d_grid.value_at(x, y) - 1:
         return (x - 1, y)
 
-    elif y + 1 < d_grid.get_height() and d_grid.tile_at(x, y + 1) == d_grid.tile_at(x, y) - 1:
+    elif y + 1 < d_grid.get_height() and d_grid.value_at(x, y + 1) == d_grid.value_at(x, y) - 1:
         return (x, y + 1)
 
 
-def complete_map(c_grid, solution, sp, ep, p):
+def complete_map(c_grid, solution, start, end, path):
     """
     (grid object, list of tuple, str, str) -> NoneType
     """
 
     for point in solution:
         # if tile is not a start or end tile
-        if c_grid.tile_at(point[0], point[1]) != sp and c_grid.tile_at(point[0], point[1]) != ep:
-            c_grid.modify_tile(point[0], point[1], p)
-
+        c_grid.modify_tile(point[0], point[1], path)
