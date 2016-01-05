@@ -10,10 +10,10 @@ if __name__ == '__main__':
     PATH = "*"  # path
     EM = "o"  # empty space
     ERROR_MESSAGE = "Not a valid position"
-    window_x = 800
-    window_y = 600
-    grid_x = 30
-    grid_y = 30
+    window_x = 1280
+    window_y = 720
+    grid_x = 15
+    grid_y = 15
     start_pos = (0, grid_y-1)
     end_pos = (grid_x-1, 0)
     window = gg.create_window(window_x, window_y)
@@ -26,6 +26,7 @@ if __name__ == '__main__':
         # find all possible shortest paths
         paths = gf.find_paths(grid, start_pos, end_pos, WALL)
         # if there are any possible paths
+        
         if gf.is_solvable(paths):
             # create a new grid with the distances
             gf.distance_map(grid, paths)
@@ -35,10 +36,16 @@ if __name__ == '__main__':
             correct_path.pop(len(correct_path)-1)
             # create a map with solution
             gf.complete_map(grid, correct_path, start_pos, end_pos, SP)
-            grid.clean_grid(EM, start_pos, end_pos)
+            grid.clean_grid(EM)
         else:
-            print(ERROR_MESSAGE)
-        gg.update_grid(window, grid, correct_path, previous_path,  EM, WALL, PATH)
-        gg.create_wall(window, grid, window.getMouse(), WALL, EM, start_pos, end_pos)
-
+            print(ERROR_MESSAGE, end="")
+            
+        gg.update_grid(window, grid, correct_path, previous_path,  
+                       EM, WALL, PATH)
+        print()
+        print("Path Length: " + str(len(correct_path)-2), end="")
+        print()
+        print()
+        gg.create_wall(window, grid, window.getMouse(), WALL, EM, 
+                       start_pos, end_pos)
         previous_path = correct_path[:]

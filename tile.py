@@ -8,7 +8,8 @@ class Tile:
         self.pos_x = length * x
         self.pos_y = height * y
         self.value = value
-        self.shape = Rectangle(Point(self.pos_x, self.pos_y), Point(self.pos_x + length, self.pos_y + height))
+        self.shape = Rectangle(Point(self.pos_x, self.pos_y), Point(
+            self.pos_x + length, self.pos_y + height))
         self.shape.setFill("white")
         self.shape.setOutline("black")
 
