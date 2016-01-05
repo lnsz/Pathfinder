@@ -1,9 +1,12 @@
-def find_paths(grid, start, end, wall):
+import math
+
+def find_paths(grid, start, end, wall, d_move):
     """
-    (Grid object, tuple, tuple, str) -> list of tuple
+    (Grid object, tuple, tuple, str, bool) -> list of tuple
 
     Going from the end until start, return all possible paths through the grid
-    avoiding wall, and add them to queue
+    avoiding wall, and add them to queue. d_move enables or disables diagonal
+    movement
     """
 
     # create queue with only endpoint
@@ -13,14 +16,14 @@ def find_paths(grid, start, end, wall):
     queue = [(end[0], end[1], 0)]
     for item in queue:
         if item[0] != start[0] or item[1] != start[1]:
-            queue.extend(process_adjacent(grid, item, queue, wall))
+            queue.extend(process_adjacent(grid, item, queue, wall, d_move))
         else:
             return queue
 
 
-def process_adjacent(grid, point, queue, wall):
+def process_adjacent(grid, point, queue, wall, d_move):
     """
-    (Grid object, tuple, list of tuple, str) -> list of tuple
+    (Grid object, tuple, list of tuple, str, bool) -> list of tuple
 
     Return all adjacent tiles that are not a wall and not already in the queue
     """
@@ -30,21 +33,41 @@ def process_adjacent(grid, point, queue, wall):
     y = point[1]
     c = point[2]
     # if point is not outside grid and is not a wall and does not exist in queue
+    # right (x + 1)
     if x + 1 < grid.get_length() and grid.value_at(x + 1, y) != wall and \
             duplicate_check(x + 1, y, c + 1, queue):
         adjacent_points.append((x + 1, y, c + 1))
-
+    # left (x - 1)
     if x - 1 >= 0 and grid.value_at(x - 1, y) != wall and \
             duplicate_check(x - 1, y, c + 1, queue):
         adjacent_points.append((x - 1, y, c + 1))
-
+    # down (y + 1)
     if y + 1 < grid.get_height() and grid.value_at(x, y + 1) != wall and \
             duplicate_check(x, y + 1, c + 1, queue):
         adjacent_points.append((x, y + 1, c + 1))
-
+    # up (y - 1)
     if y - 1 >= 0 and grid.value_at(x, y - 1) != wall and \
             duplicate_check(x, y - 1, c + 1, queue):
         adjacent_points.append((x, y - 1, c + 1))
+    # d_move enables the other 4 directions
+    if d_move:
+        # up right (x + 1, y - 1)
+        if x + 1 < grid.get_length() and y - 1 >= 0 and grid.value_at(x + 1, y - 1)\
+                != wall and duplicate_check(x + 1, y - 1, c + math.sqrt(2), queue):
+            adjacent_points.append((x + 1, y - 1, c + math.sqrt(2)))
+        # down right (x + 1, y + 1)
+        if x + 1 < grid.get_length() and y + 1 < grid.get_height() and grid.value_at(x + 1, y + 1)\
+                != wall and duplicate_check(x + 1, y + 1, c + math.sqrt(2), queue):
+            adjacent_points.append((x + 1, y + 1, c + math.sqrt(2)))
+        # up left (x - 1, y - 1)
+        if x - 1 >= 0 and y - 1 >= 0 and grid.value_at(x - 1, y - 1)\
+                != wall and duplicate_check(x - 1, y - 1, c + math.sqrt(2), queue):
+            adjacent_points.append((x - 1, y - 1, c + math.sqrt(2)))
+        # down left (x - 1, y + 1)
+        if x - 1 >= 0 and y + 1 < grid.get_height() and grid.value_at(x - 1, y + 1)\
+                != wall and duplicate_check(x - 1, y + 1, c + math.sqrt(2), queue):
+            adjacent_points.append((x - 1, y + 1, c + math.sqrt(2)))
+
     return adjacent_points
 
 
@@ -84,9 +107,9 @@ def distance_map(grid, paths):
         grid.modify_tile(point[0], point[1], point[2])
 
 
-def generate_path(start, end, grid):
+def generate_path(start, end, grid, d_move):
     """
-    (tuple, tuple, Grid object) -> list of tuple
+    (tuple, tuple, Grid object, bool) -> list of tuple
 
     Return the shortest path from start to end through the grid
     """
@@ -94,34 +117,60 @@ def generate_path(start, end, grid):
     path = [start]
     point = start
     while point != end:
-        point = next_point(point, grid)
+        point = next_point(point, grid, d_move)
         path.append(point)
     return path
 
 
-def next_point(point, grid):
+def next_point(point, grid, d_move):
     """
-    (tuple, Grid object) -> tuple
+    (tuple, Grid object, bool) -> tuple
 
-    Return an adjacent point in grid with a counter that is exactly 1 less
-    than current point
+    Return an adjacent point with the smallest counter
     """
 
     # if point is not outside map and the adjacent point's counter is 1 less
     # than it's counter
     x = point[0]
     y = point[1]
-    if y - 1 >= 0 and grid.value_at(x, y - 1) == grid.value_at(x, y) - 1:
-        return (x, y - 1)
+    available_spaces = []
+    available_points = []
+    min_value = math.inf
+    current_min = -1
+    if x - 1 >= 0:
+        available_spaces.append(grid.value_at(x - 1, y))
+        available_points.append((x - 1, y))
+        if d_move:
+            if y - 1 >= 0:
+                available_spaces.append(grid.value_at(x - 1, y - 1))
+                available_points.append((x - 1, y - 1))
+            if y + 1 < grid.get_height():
+                available_spaces.append(grid.value_at(x - 1, y + 1))
+                available_points.append((x - 1, y + 1))
+    if x + 1 < grid.get_height():
+        available_spaces.append(grid.value_at(x + 1, y))
+        available_points.append((x + 1, y))
+        if d_move:
+            if y - 1 >= 0:
+                available_spaces.append(grid.value_at(x + 1, y - 1))
+                available_points.append((x + 1, y - 1))
+            if y + 1 < grid.get_height():
+                available_spaces.append(grid.value_at(x + 1, y + 1))
+                available_points.append((x + 1, y + 1))
+    if y - 1 >= 0:
+        available_spaces.append(grid.value_at(x, y - 1))
+        available_points.append((x, y - 1))
+    if y + 1 < grid.get_height():
+        available_spaces.append(grid.value_at(x, y + 1))
+        available_points.append((x, y + 1))
 
-    elif x + 1 < grid.get_length() and grid.value_at(x + 1, y) == grid.value_at(x, y) - 1:
-        return (x + 1, y)
+    for i in range(len(available_spaces)):
+        if type(available_spaces[i]) != str and available_spaces[i] < min_value:
+            min_value = available_spaces[i]
+            current_min = i
 
-    elif x - 1 >= 0 and grid.value_at(x - 1, y) == grid.value_at(x, y) - 1:
-        return (x - 1, y)
-
-    elif y + 1 < grid.get_height() and grid.value_at(x, y + 1) == grid.value_at(x, y) - 1:
-        return (x, y + 1)
+    if current_min >= 0:
+        return available_points[current_min]
 
 
 def complete_map(grid, solution, start, end, path):

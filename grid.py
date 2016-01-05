@@ -23,7 +23,10 @@ class Grid:
         s = ""
         for x in self.tiles:
             for y in x:
-                s += str(y)
+                if type(y.get_value()) == float:
+                    s += str(round(y.get_value(), 2))
+                else:
+                    s += str(y) + "   "
                 s += "\t"
             s += "\n"
         return s
