@@ -1,10 +1,9 @@
 def find_paths(grid, start, end, wall):
     """
-    (grid object, tuple, tuple, str) -> list of tuple
+    (Grid object, tuple, tuple, str) -> list of tuple
 
-    Going from the end until start, find all possible paths through the grid
+    Going from the end until start, return all possible paths through the grid
     avoiding wall, and add them to queue
-
     """
 
     # create queue with only endpoint
@@ -21,7 +20,9 @@ def find_paths(grid, start, end, wall):
 
 def process_adjacent(grid, point, queue, wall):
     """
-    (grid object, tuple, list of tuple, str) -> list of tuple
+    (Grid object, tuple, list of tuple, str) -> list of tuple
+
+    Return all adjacent tiles that are not a wall and not already in the queue
     """
 
     adjacent_points = []
@@ -50,70 +51,86 @@ def process_adjacent(grid, point, queue, wall):
 def duplicate_check(x, y, counter, queue):
     """
     (int, int, int, list of tuple) -> bool
+
+    Return true if and only if queue does not contain an item with the same
+    x, y and a lower or equal counter
     """
+
     for item in queue:
         if item[0] == x and item[1] == y and item[2] <= counter:
             return False
     return True
 
 
-def is_solvable(queue):
+def is_solvable(paths):
     """
     (list of tuple) -> bool
+
+    Return true if and only if paths contains at least one item (at least one
+    path exists)
     """
 
-    return queue is not None
+    return paths is not None
 
 
-def distance_map(d_grid, paths):
+def distance_map(grid, paths):
     """
-    (grid object, list of tuple) -> NoneType
+    (Grid object, list of tuple) -> NoneType
+
+    Replace empty tiles from grid with the number of moves to get there
     """
 
     for point in paths:
-        d_grid.modify_tile(point[0], point[1], point[2])
+        grid.modify_tile(point[0], point[1], point[2])
 
 
-def generate_path(start, end, d_map):
+def generate_path(start, end, grid):
     """
-    (tuple, tuple, grid object) -> list of tuple
+    (tuple, tuple, Grid object) -> list of tuple
+
+    Return the shortest path from start to end through the grid
     """
 
     path = [start]
     point = start
     while point != end:
-        point = next_point(point, d_map)
+        point = next_point(point, grid)
         path.append(point)
     return path
 
 
-def next_point(point, d_grid):
+def next_point(point, grid):
     """
-    (tuple, grid object) -> tuple
+    (tuple, Grid object) -> tuple
+
+    Return an adjacent point in grid with a counter that is exactly 1 less
+    than current point
     """
 
     # if point is not outside map and the adjacent point's counter is 1 less
     # than it's counter
     x = point[0]
     y = point[1]
-    if y - 1 >= 0 and d_grid.value_at(x, y - 1) == d_grid.value_at(x, y) - 1:
+    if y - 1 >= 0 and grid.value_at(x, y - 1) == grid.value_at(x, y) - 1:
         return (x, y - 1)
 
-    elif x + 1 < d_grid.get_length() and d_grid.value_at(x + 1, y) == d_grid.value_at(x, y) - 1:
+    elif x + 1 < grid.get_length() and grid.value_at(x + 1, y) == grid.value_at(x, y) - 1:
         return (x + 1, y)
 
-    elif x - 1 >= 0 and d_grid.value_at(x - 1, y) == d_grid.value_at(x, y) - 1:
+    elif x - 1 >= 0 and grid.value_at(x - 1, y) == grid.value_at(x, y) - 1:
         return (x - 1, y)
 
-    elif y + 1 < d_grid.get_height() and d_grid.value_at(x, y + 1) == d_grid.value_at(x, y) - 1:
+    elif y + 1 < grid.get_height() and grid.value_at(x, y + 1) == grid.value_at(x, y) - 1:
         return (x, y + 1)
 
 
-def complete_map(c_grid, solution, start, end, path):
+def complete_map(grid, solution, start, end, path):
     """
-    (grid object, list of tuple, str, str) -> NoneType
+    (Grid object, list of tuple, str, str) -> NoneType
+
+    Change grid to contain the solution for the shortest path from start to end
     """
 
     for point in solution:
         # if tile is not a start or end tile
-        c_grid.modify_tile(point[0], point[1], path)
+        grid.modify_tile(point[0], point[1], path)
