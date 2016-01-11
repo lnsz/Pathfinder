@@ -147,7 +147,7 @@ def next_point(point, grid, d_move):
             if y + 1 < grid.get_height():
                 available_spaces.append(grid.value_at(x - 1, y + 1))
                 available_points.append((x - 1, y + 1))
-    if x + 1 < grid.get_height():
+    if x + 1 < grid.get_length():
         available_spaces.append(grid.value_at(x + 1, y))
         available_points.append((x + 1, y))
         if d_move:
