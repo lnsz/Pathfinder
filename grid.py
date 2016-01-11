@@ -58,5 +58,5 @@ class Grid:
     def clean_grid(self, empty):
         for x in self.tiles:
             for y in x:
-                if type(y.get_value()) == int:
+                if type(y.get_value()) == int or type(y.get_value()) == float:
                     y.set_value(empty)
