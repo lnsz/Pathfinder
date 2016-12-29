@@ -1,5 +1,5 @@
-import game_functions as gf
-import game_graphics as gg
+import functions as gf
+import graphics as gg
 import grid as gr
 
 
