@@ -3,4 +3,4 @@ Pathfinding algorithm for a rectangular grid
 
 Left click to create/destroy walls
 
-Uses graphics.py library
+![Alt text](https://lucaslunasouza.github.io/Photos/pathfinder.jpg)
